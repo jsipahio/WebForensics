@@ -1,7 +1,6 @@
 import sqlite3
 from pprint import pprint
 import sys
-import pandas as pd
 import json
 
 args = sys.argv
@@ -10,7 +9,7 @@ base_path = args[1]
 
 paths = {
     "history": base_path + "/User Data/Default/History",
-    "cookies": base_path + "\\User Data\\Default\\Network\\Cookies",
+    "cookies": base_path + "/User Data/Default/Network/Cookies",
     "cache": base_path + "/User Data/Default/Cache/Chache_Data/",
     "bookmarks": base_path + "/User Data/Default/Bookmarks"
 }
