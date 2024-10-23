@@ -10,7 +10,7 @@ base_path = args[1]
 paths = {
     "history": base_path + "/User Data/Default/History",
     "cookies": base_path + "/User Data/Default/Network/Cookies",
-    "cache": base_path + "/User Data/Default/Cache/Chache_Data/",
+    "cache": base_path + "/User Data/Default/Cache/Cache_Data/",
     "bookmarks": base_path + "/User Data/Default/Bookmarks"
 }
 
@@ -23,23 +23,23 @@ def get_cookies():
     crs = cnn.cursor()
 
     cookies_sql = """
-    select strftime('%m-%d-%Y', creation_utc, 'unixepoch'),
+    select strftime('%m-%d-%Y', creation_utc/1000, 'unixepoch'),
         host_key,
         top_frame_site_key,
         name,
         value,
         encrypted_value,
         path,
-        strftime('%m-%d-%Y', expires_utc, 'unixepoch'),
+        strftime('%m-%d-%Y', expires_utc/1000, 'unixepoch'),
         is_secure,
         is_httponly,
-        strftime('%m-%d-%Y', last_access_utc, 'unixepoch'),
+        strftime('%m-%d-%Y', last_access_utc/1000, 'unixepoch'),
         case when has_expires = 1 then true else false end as has_expires,
         priority,
         samesite,
         source_scheme,
         source_port,
-        strftime('%m-%d-%Y', last_update_utc, 'unixepoch')
+        strftime('%m-%d-%Y', last_update_utc/1000, 'unixepoch')
     from cookies
     """
 
@@ -60,7 +60,7 @@ def get_history():
         title,
         visit_count,
         typed_count,
-        strftime('%m-%d-%Y', last_visit_time, 'unixepoch'),
+        datetime(last_visit_time/1e6-11644473600,'unixepoch','utc'),
         hidden
     from urls
     """

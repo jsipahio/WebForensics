@@ -11,6 +11,7 @@ def print_help():
     help_msg += "browser: supported broswers are Microsoft Edge Chromium (edgec), Google Chrome (chrome), Mozilla Firefox (firefox)\n"
     help_msg += "pass -d if passing path to browser data directory. pass -f if passing a file. if passing a file, the type (ex: --history) must be specified\n"
     help_msg += "directory: usually located at 'C:\\Users\\username\\AppData\\Local\\CompanyName\\BrowserName'.\n"
+    help_msg += "NOTE: Firefox cookies, bookmarks, and history are in Roaming, not Local directory. The Firefox cache is in Local, however."
     help_msg += "file: can be history, cookies, or bookmarks file. must pass file type as next argument\n"
     help_msg += "type: if passing a file this parameter is required. if passing a directory, passing this argument will only return the data for that type\n"
     help_msg += "output: instead of printing to console, data will be output to file or directory stated. if doing a cache dump, output directory must be specified.\n"

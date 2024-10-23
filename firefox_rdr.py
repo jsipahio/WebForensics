@@ -8,10 +8,10 @@ args = sys.argv
 base_path = args[1]
 
 paths = {
-    "history": base_path + "/User Data/Default/History",
-    "cookies": base_path + "/User Data/Default/Network/Cookies",
-    "cache": base_path + "/User Data/Default/Cache/Chache_Data/",
-    "bookmarks": base_path + "/User Data/Default/Bookmarks"
+    "history": base_path + "/Profiles/*.default-release/places.sqlite",
+    "cookies": base_path + "/Profiles/*.default-release/cookies.sqlite",
+    "cache": base_path + "/Profiles/*.default-release/cache2/",
+    "bookmarks": base_path + "/Profiles/*.default-release/places.sqlite"
 }
 
 print(paths["cookies"])
