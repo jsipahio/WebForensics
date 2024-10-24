@@ -96,38 +96,38 @@ def get_cache(output_path):
                     if output_path is not None:
                         with open(os.path.join(output_path, file + ".jpg"), 'wb') as fout:
                             fout.write(bytes)
-                        print(f"path to file is {os.path.join(output_path, file + ".jpg")}")
+                        print(f"path to file is {os.path.join(output_path, file + '.jpg')}")
                 elif bytes[0] == 0x89 and bytes[1] == 0x50 and bytes[2] == 0x4e and bytes[3] == 0x47 and bytes[4] == 0x0d and bytes[5] == 0x0a and bytes[6] == 0x1a and bytes[7] == 0x0a:
                     print(f"{file} is png")
                     if output_path is not None:
                         with open(os.path.join(output_path, file + ".png"), 'wb') as fout:
                             fout.write(bytes)
-                        print(f"path to file is {os.path.join(output_path, file + ".png")}")
+                        print(f"path to file is {os.path.join(output_path, file + '.png')}")
                 elif bytes[0] == 0x47 and bytes[1] == 0x49 and bytes[2] == 0x46 and bytes[3] == 0x38 and bytes[4] == 0x37 and bytes[5] == 0x61: 
                     print(f"{file} is gif")
                     if output_path is not None:
                         with open(os.path.join(output_path, file + ".gif"), 'wb') as fout:
                             fout.write(bytes)
-                        print(f"path to file is {os.path.join(output_path, file + ".gif")}")
+                        print(f"path to file is {os.path.join(output_path, file + '.gif')}")
                 elif bytes[0] == 0x47 and bytes[1] == 0x49 and bytes[2] == 0x46 and bytes[3] == 0x38 and bytes[4] == 0x39 and bytes[5] == 0x61:
                     print(f"{file} is gif")
                     if output_path is not None:
                         with open(os.path.join(output_path, file + ".gif"), 'wb') as fout:
                             fout.write(bytes)
-                        print(f"path to file is {os.path.join(output_path, file + ".gif")}")
+                        print(f"path to file is {os.path.join(output_path, file + '.gif')}")
                 elif bytes[0] == 0x87 and bytes[1] == 0x45 and bytes[2] == 0x42 and bytes[3] == 0x50:
                     print(f"{file} is webp")
                     if output_path is not None:
                         with open(os.path.join(output_path, file + ".webp"), 'wb') as fout:
                             fout.write(bytes)
-                        print(f"path to file is {os.path.join(output_path, file + ".webp")}")
+                        print(f"path to file is {os.path.join(output_path, file + '.webp')}")
                 elif bytes[0] == 0x1f and bytes[1] == 0x8b and bytes[2] == 0x08:
                     print(f"{file} is gzip archive")
                     decompressed_bytes = gzip.decompress(bytes)
                     if output_path is not None:
                         with open(os.path.join(output_path, file + ".txt"), 'wb') as fout:
                             fout.write(decompressed_bytes)
-                        print(f"path to file is {os.path.join(output_path, file + ".txt")}")
+                        print(f"path to file is {os.path.join(output_path, file + '.txt')}")
         except:
             continue
 
