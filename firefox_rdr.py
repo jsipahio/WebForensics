@@ -1,6 +1,7 @@
 import sqlite3
 from pprint import pprint
 import sys
+import glob
 import json
 
 args = sys.argv
@@ -18,29 +19,29 @@ print(paths["cookies"])
 
 
 def get_cookies():
-    cnn = sqlite3.connect(paths["cookies"])
+    print(glob.glob(paths["cookies"]))
+    cnn = sqlite3.connect(glob.glob(paths["cookies"])[0])
     # cnn = sqlite3.connect("Cookies.db")
     crs = cnn.cursor()
 
     cookies_sql = """
-    select strftime('%m-%d-%Y', creation_utc, 'unixepoch'),
-        host_key,
-        top_frame_site_key,
+    select
+        id,
+        originAttributes,
         name,
         value,
-        encrypted_value,
+        host,
         path,
-        strftime('%m-%d-%Y', expires_utc, 'unixepoch'),
-        is_secure,
-        is_httponly,
-        strftime('%m-%d-%Y', last_access_utc, 'unixepoch'),
-        case when has_expires = 1 then true else false end as has_expires,
-        priority,
-        samesite,
-        source_scheme,
-        source_port,
-        strftime('%m-%d-%Y', last_update_utc, 'unixepoch')
-    from cookies
+        strftime('%m-%d-%Y', expiry/1000000, 'unixepoch'),
+        strftime('%m-%d-%Y', lastAccessed/1000000, 'unixepoch'),
+        strftime('%m-%d-%Y', creationTime/1000000, 'unixepoch'),
+        case when isSecure = 1 then true else false end as has_expires,
+        isHttpOnly,
+        inBrowserElement,
+        sameSite,
+        rawSameSite,
+        schemeMap
+    from moz_cookies
     """
 
     crs.execute(cookies_sql)
@@ -50,19 +51,23 @@ def get_cookies():
 
 
 def get_history():
-    cnn = sqlite3.connect(paths["history"])
+    cnn = sqlite3.connect(glob.glob(paths["history"])[0])
     crs = cnn.cursor()
 
     history_sql = """
     select 
-        id,
-        url,
-        title,
-        visit_count,
-        typed_count,
-        strftime('%m-%d-%Y', last_visit_time, 'unixepoch'),
-        hidden
-    from urls
+        h.id,
+        p.url,
+        p.title,
+        p.description,
+        h.from_visit,
+        h.place_id,
+        strftime('%m-%d-%Y', h.visit_date/1000000, 'unixepoch'),
+        h.visit_type,
+        h.session,
+        h.source,
+        h.triggeringPlaceId
+    from moz_historyvisits h join moz_places p on h.place_id = p.id
     """
 
     crs.execute(history_sql)
@@ -72,30 +77,52 @@ def get_history():
 
 
 def get_bookmarks():
-    with open(paths["bookmarks"], 'r') as f:
-        text = f.read()
-    bookmarks = json.loads(text)
+    cnn = sqlite3.connect(glob.glob(paths['bookmarks'])[0])
+    crs = cnn.cursor()
+
+    bookmarks_sql = """
+    select 
+        b.id,
+        p.url,
+        p.title,
+        p.description,
+        b.type,
+        b.fk,
+        b.parent,
+        b.position,
+        b.title,
+        b.keyword_id,
+        b.folder_type,
+        b.dateAdded,
+        b.lastModified,
+        b.guid,
+        b.syncStatus,
+        b.syncChangeCounter
+    from moz_bookmarks b join moz_places p on b.fk = p.id
+    """
+    crs.execute(bookmarks_sql)
+    bookmarks = crs.fetchall()
     return bookmarks
 
 
 if __name__ == "__main__":
     if args[1] == "-h":
-        print("""usage: python chrome_rdr <chrome_directory> [<option>]
-options: --history: Chrome browsing history
-         --cookies: Chrome cookies""")
+        print("""usage: python firefox_rdr <firefox_directory> [<option>]
+options: --history: Firefox browsing history
+         --cookies: Firefox cookies""")
         exit()
     if len(args) < 3:
-        print("Chrome history")
+        print("Firefox history")
         pprint(get_history())
-        print("Chrome cookies")
+        print("Firefox cookies")
         pprint(get_cookies())
     elif args[2] == "--history":
-        print("Chrome history")
+        print("Firefox history")
         pprint(get_history())
     elif args[2] == "--cookies":
-        print("Chrome cookies")
+        print("Firefox cookies")
         pprint(get_cookies())
     elif args[2] == "--bookmarks":
-        print("Chrome bookmarks")
+        print("Firefox bookmarks")
         pprint(get_bookmarks())
     exit()

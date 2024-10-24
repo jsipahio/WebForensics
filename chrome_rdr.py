@@ -2,6 +2,10 @@ import sqlite3
 from pprint import pprint
 import sys
 import json
+import pyhindsight
+from pyhindsight.analysis import AnalysisSession
+
+session = AnalysisSession()
 
 args = sys.argv
 
@@ -10,7 +14,7 @@ base_path = args[1]
 paths = {
     "history": base_path + "/User Data/Default/History",
     "cookies": base_path + "/User Data/Default/Network/Cookies",
-    "cache": base_path + "/User Data/Default/Cache/Cache_Data/",
+    "cache": base_path + "/User Data/Default/",
     "bookmarks": base_path + "/User Data/Default/Bookmarks"
 }
 
@@ -78,6 +82,22 @@ def get_bookmarks():
     return bookmarks
 
 
+def get_cache():
+    session.input_path = paths['cache']
+    session.browser_type = 'Chrome'
+    session.no_copy = True
+    session.timezone = None
+
+    run_status = session.run()
+    if not run_status:
+        print("run failed")
+        exit()
+
+    for p in session.parsed_artifacts:
+        if isinstance(p, pyhindsight.browsers.chrome.CacheEntry):
+            print(f"url: {p.url}\nlocation: {p.location}")
+
+
 if __name__ == "__main__":
     if args[1] == "-h":
         print("""usage: python chrome_rdr <chrome_directory> [<option>]
@@ -98,4 +118,7 @@ options: --history: Chrome browsing history
     elif args[2] == "--bookmarks":
         print("Chrome bookmarks")
         pprint(get_bookmarks())
+    elif args[2] == "--cache":
+        print("chrome cache")
+        get_cache()
     exit()
