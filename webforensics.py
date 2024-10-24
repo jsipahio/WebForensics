@@ -50,6 +50,8 @@ def handle_firefox():
 
 
 if __name__ == "__main__":
+    print("still under development :(")
+    exit()
     if len(sys.argv) < 2:
         print_help()
         exit()

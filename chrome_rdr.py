@@ -2,10 +2,8 @@ import sqlite3
 from pprint import pprint
 import sys
 import json
-import pyhindsight
-from pyhindsight.analysis import AnalysisSession
-
-session = AnalysisSession()
+import os
+import gzip
 
 args = sys.argv
 
@@ -14,7 +12,7 @@ base_path = args[1]
 paths = {
     "history": base_path + "/User Data/Default/History",
     "cookies": base_path + "/User Data/Default/Network/Cookies",
-    "cache": base_path + "/User Data/Default/",
+    "cache": base_path + "/User Data/Default/Cache/Cache_Data/",
     "bookmarks": base_path + "/User Data/Default/Bookmarks"
 }
 
@@ -83,22 +81,35 @@ def get_bookmarks():
 
 
 def get_cache():
-    session.input_path = paths['cache']
-    session.browser_type = 'Chrome'
-    session.no_copy = True
-    session.timezone = None
-
-    run_status = session.run()
-    if not run_status:
-        print("run failed")
-        exit()
-
-    for p in session.parsed_artifacts:
-        if isinstance(p, pyhindsight.browsers.chrome.CacheEntry):
-            print(f"url: {p.url}\nlocation: {p.location}")
+    files = os.listdir(paths['cache'])
+    for file in files:
+        # print(os.path.join(paths['cache'], file))
+        # continue
+        if os.path.isdir(os.path.join(paths['cache'], file)):
+            continue
+        try:
+            with open(os.path.join(paths['cache'], file), 'rb') as f:
+                bytes = f.read()
+                # print(f"for file {file}: f[0] = {hex(bytes[0])} and f[1] = {hex(bytes[1])}")
+                if bytes[0] == 0xff and bytes[1] == 0xd8:
+                    print(f"{file} is jpg")
+                elif bytes[0] == 0x89 and bytes[1] == 0x50 and bytes[2] == 0x4e and bytes[3] == 0x47 and bytes[4] == 0x0d and bytes[5] == 0x0a and bytes[6] == 0x1a and bytes[7] == 0x0a:
+                    print(f"{file} is png")
+                elif bytes[0] == 0x47 and bytes[1] == 0x49 and bytes[2] == 0x46 and bytes[3] == 0x38 and bytes[4] == 0x37 and bytes[5] == 0x61: 
+                    print(f"{file} is gif")
+                elif bytes[0] == 0x47 and bytes[1] == 0x49 and bytes[2] == 0x46 and bytes[3] == 0x38 and bytes[4] == 0x39 and bytes[5] == 0x61:
+                    print(f"{file} is gif")
+                elif bytes[0] == 0x1f and bytes[1] == 0x8b and bytes[2] == 0x08:
+                    print(f"{file} is gzip archive")
+        except:
+            continue
 
 
 if __name__ == "__main__":
+    # with open('Chrome/User Data/Default/Cache/Cache_Data/f_000003', 'rb') as f:
+        # bytes = f.read()
+        # print(f"for file 000003: f[0] = {hex(bytes[0])} and f[1] = {hex(bytes[1])}")
+        # exit()
     if args[1] == "-h":
         print("""usage: python chrome_rdr <chrome_directory> [<option>]
 options: --history: Chrome browsing history
