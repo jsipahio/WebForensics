@@ -5,6 +5,8 @@ import glob
 import json
 import os
 import gzip
+from gen_html import gen_html
+import webbrowser
 
 args = sys.argv
 
@@ -48,6 +50,11 @@ def get_cookies():
 
     crs.execute(cookies_sql)
     rows = crs.fetchall()
+    headers = "id,originAttributes,name,value,host,path,expiry,lastAccessed,creationTime,isSecure,isHttpOnly,inBrowserElement,sameSite,rawSameSite,schemeMap"
+    html = gen_html(title="Firefox Cookies", headers=headers, data=rows)
+    with open("firefox_cookies.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd(), "firefox_cookies.html"))
     # pprint(rows)
     return rows
 
@@ -74,6 +81,11 @@ def get_history():
 
     crs.execute(history_sql)
     rows = crs.fetchall()
+    headers = "id,url,title,description,from_visit,place_id,visit_date,visit_type,session,source,triggeringPlaceId".split(",")
+    html = gen_html(title="Firefox History", headers=headers, data=rows)
+    with open ("firefox_history.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd(), "firefox_history.html"))
     # pprint(rows)
     return rows
 
@@ -158,6 +170,11 @@ def get_bookmarks():
     """
     crs.execute(bookmarks_sql)
     bookmarks = crs.fetchall()
+    headers = "id,url,title,description,type,fk,parent,position,title,keyword_id,folder_type,dateAdded,lastModified,guid,syncStatus,syncChangeCounter".split(",")
+    html = gen_html(title="Firefox Bookmarks", headers=headers, data=bookmarks)
+    with open ("firefox_bookmarks.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd(), "firefox_bookmarks.html"))
     return bookmarks
 
 

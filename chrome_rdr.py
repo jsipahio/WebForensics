@@ -4,6 +4,8 @@ import sys
 import json
 import os
 import gzip
+from gen_html import gen_html
+import webbrowser
 
 args = sys.argv
 
@@ -25,28 +27,34 @@ def get_cookies():
     crs = cnn.cursor()
 
     cookies_sql = """
-    select strftime('%m-%d-%Y', creation_utc/1000, 'unixepoch'),
+    select
+        datetime(creation_utc/1e6-11644473600,'unixepoch','utc'),
         host_key,
         top_frame_site_key,
         name,
         value,
         encrypted_value,
         path,
-        strftime('%m-%d-%Y', expires_utc/1000, 'unixepoch'),
+        datetime(expires_utc/1e6-11644473600,'unixepoch','utc'),
         is_secure,
         is_httponly,
-        strftime('%m-%d-%Y', last_access_utc/1000, 'unixepoch'),
+        datetime(last_access_utc/1e6-11644473600,'unixepoch','utc'),
         case when has_expires = 1 then true else false end as has_expires,
         priority,
         samesite,
         source_scheme,
         source_port,
-        strftime('%m-%d-%Y', last_update_utc/1000, 'unixepoch')
+        datetime(last_update_utc/1e6-11644473600,'unixepoch','utc')
     from cookies
     """
 
     crs.execute(cookies_sql)
     rows = crs.fetchall()
+    headers = "creation_utc,host_key,top_frame_site_key,name,value,encrypted_value,path,expires_utc,is_secure,is_httponly,last_access_utc,has_expires,priority,samesite,source_scheme,source_port,last_update_utc".split(',')
+    html = gen_html(title="Chrome Cookies", headers=headers, data=rows)
+    with open("chrome_cookies.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd(), "chrome_cookies.html"))
     # pprint(rows)
     return rows
 
@@ -66,9 +74,13 @@ def get_history():
         hidden
     from urls
     """
-
     crs.execute(history_sql)
     rows = crs.fetchall()
+    headers = "id,url,title,visit_count,typed_count,last_visit_time,hidden".split(",")
+    html = gen_html(title="Chrome History", headers=headers, data=rows)
+    with open ("chrome_history.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd(), "chrome_history.html"))
     # pprint(rows)
     return rows
 
@@ -77,6 +89,22 @@ def get_bookmarks():
     with open(paths["bookmarks"], 'r') as f:
         text = f.read()
     bookmarks = json.loads(text)
+    try:
+        roots = bookmarks['roots']
+    except:
+        print('cannot find roots')
+    for key, val in roots.items():
+        print('key:', key)
+        if len(val['children']) > 1:
+            for child_key, child in val.items():
+                if child_key == 'children':
+                    for item in child:
+                        print(item)
+                else:
+                    print("key:", child_key)
+                    print("child: ", child)
+        else:
+            print("val:", val)
     return bookmarks
 
 
@@ -162,7 +190,8 @@ options: --history: Chrome browsing history
         pprint(get_cookies())
     elif args[2] == "--bookmarks":
         print("Chrome bookmarks")
-        pprint(get_bookmarks())
+        get_bookmarks()
+        # pprint(get_bookmarks())
     elif args[2] == "--cache":
         output_path = None
         try:
@@ -173,3 +202,29 @@ options: --history: Chrome browsing history
         print("chrome cache")
         get_cache(output_path)
     exit()
+
+
+
+"""
+key: bookmark_bar
+val: {'children': [], 'date_added': '13355079180650349', 'date_last_used': '0', 'date_modified': '0', 'guid': '0bc5d13f-2cba-5d74-951f-3f233fe6c908', 'id': '1', 'name': 'Bookmarks bar', 'type': 'folder'}
+key: other
+key: children
+child:  [{'date_added': '13355079367486086', 'date_last_used': '0', 'guid': '4e967a07-a0d3-46e1-b530-31e0cfc1ccf3', 'id': '5', 'meta_info': {'power_bookmark_meta': ''}, 'name': 'Different Online Crypto Tools', 'type': 'url', 'url': 'https://www.devglan.com/'}, {'date_added': '13355079494487496', 'date_last_used': '0', 'guid': '7fa8a9bb-0184-4ce8-9cb2-7812154a4025', 'id': '6', 'meta_info': {'power_bookmark_meta': ''}, 'name': 'Encrypt and Decrypt Text Online', 'type': 'url', 'url': 'https://www.devglan.com/online-tools/text-encryption-decryption'}]
+key: date_added
+child:  13355079180650351
+key: date_last_used
+child:  0
+key: date_modified
+child:  13355079494487496
+key: guid
+child:  82b081ec-3dd3-529c-8475-ab6c344590dd
+key: id
+child:  2
+key: name
+child:  Other bookmarks
+key: type
+child:  folder
+key: synced
+val: {'children': [], 'date_added': '13355079180650352', 'date_last_used': '0', 'date_modified': '0', 'guid': '4cf2e351-0e85-532b-bb37-df045d8f8d0f', 'id': '3', 'name': 'Mobile bookmarks', 'type': 'folder'}
+"""

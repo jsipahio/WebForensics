@@ -4,6 +4,8 @@ import sys
 import json
 import os
 import gzip
+from gen_html import gen_html
+import webbrowser
 
 args = sys.argv
 
@@ -47,6 +49,11 @@ def get_cookies():
 
     crs.execute(cookies_sql)
     rows = crs.fetchall()
+    headers = "creation_utc,host_key,top_frame_site_key,name,value,encrypted_value,path,expires_utc,is_secure,is_httponly,last_access_utc,has_expires,priority,samesite,source_scheme,source_port,last_update_utc".split(',')
+    html = gen_html(title="Edge Chromium Cookies", headers=headers, data=rows)
+    with open("edge_chromium_cookies.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd(), "edge_chromium_cookies.html"))
     # pprint(rows)
     return rows
 
@@ -69,6 +76,11 @@ def get_history():
 
     crs.execute(history_sql)
     rows = crs.fetchall()
+    headers = "id,url,title,visit_count,typed_count,last_visit_time,hidden".split(",")
+    html = gen_html(title="Edge Chromium History", headers=headers, data=rows)
+    with open ("edge_chromium_history.html", 'w') as f:
+        f.write(html)
+    webbrowser.open_new_tab(os.path.join(os.getcwd, "edge_chromium_history.html"))
     # pprint(rows)
     return rows
 
